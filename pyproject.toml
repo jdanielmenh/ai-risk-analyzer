@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ai-risk-analyzer"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "api", from = "src" },
+            { include = "ingestion", from = "src" },
+            { include = "models", from = "src" },
+            { include = "preprocessing", from = "src" },
+            { include = "utils", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.10.6"
+fastapi = "^0.115.11"
+uvicorn = "^0.34.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
