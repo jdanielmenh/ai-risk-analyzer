@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from src.api.routers.search_router import router as search_router
 
 # FastAPI Instance
