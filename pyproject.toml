@@ -7,13 +7,12 @@ readme = "README.md"
 packages = [{ include = "api", from = "src" },
             { include = "ingestion", from = "src" },
             { include = "models", from = "src" },
-            { include = "preprocessing", from = "src" },
             { include = "utils", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
 pydantic = "^2.10.6"
-fastapi = "^0.115.11"
+fastapi = "0.115.9"
 uvicorn = "^0.34.0"
 requests = "^2.32.3"
 bs4 = "^0.0.2"
@@ -25,6 +24,9 @@ pandas = "^2.2.3"
 lxml = "^5.3.1"
 tenacity = "^9.1.2"
 pytest = "^8.3.5"
+langchain = "^0.3.23"
+langgraph = "^0.3.25"
+pydantic-settings = "^2.8.1"
 
 
 [tool.ruff]
