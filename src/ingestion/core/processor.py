@@ -4,19 +4,18 @@ import re
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-# Assuming these models exist in your project
-from ingestion.models.ingestion_models import (
+from src.ingestion.core.constants import (
+    ITEM_TITLE_MAPPING,
+)
+from src.ingestion.models.ingestion_models import (
     ChunkMetadata,
     DocumentChunk,
     Section,
     TableOfContentsItem,
 )
+from src.utils.logging_utils import setup_logging
 
-# Configure logging - Reduced verbosity, INFO level shows key steps
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(__name__)
 
 
 class SECProcessor:
@@ -89,6 +88,9 @@ class SECProcessor:
             logger.exception(f"Error loading or parsing HTML from {filepath}: {e}")
             return None
 
+    def _get_item_title(self, item_id: str) -> str:
+        return ITEM_TITLE_MAPPING.get(item_id.strip(), item_id)
+
     def _extract_table_of_contents(
         self, soup: BeautifulSoup
     ) -> list[TableOfContentsItem]:
@@ -109,41 +111,22 @@ class SECProcessor:
                 match = self.item_pattern.match(link_text)
                 if match:
                     item_number = match.group(1).strip().rstrip(".")
-                    title = link_text[match.end() :].strip().lstrip(".- ").strip()
-
-                    if not title or len(title) < 5:
-                        parent_text_element = link.find_parent(["td", "p", "li"])
-                        if parent_text_element:
-                            full_text = parent_text_element.get_text(" ", strip=True)
-                            title_match = re.search(
-                                rf"{re.escape(item_number)}\.?\s*(.*)",
-                                full_text,
-                                re.IGNORECASE,
-                            )
-                            if title_match and title_match.group(1):
-                                title = title_match.group(1).strip()
-
-                    title = re.sub(r"\s*\.{3,}\s*\d+$", "", title).strip()
-                    title = re.sub(r"\s+\d+$", "", title).strip()
                     anchor = link["href"]
 
                     if item_number.lower() not in seen_items:
                         toc_items.append(
                             TableOfContentsItem(
                                 item_number=item_number,
-                                title=title if title else "N/A",
+                                title=self._get_item_title(item_number),
                                 anchor_text=anchor,
                             )
                         )
                         seen_items.add(item_number.lower())
                         found_toc_in_links = True
 
-            # If we found items, assume it's the main TOC and stop.
-            # This assumption might need adjustment for complex structures.
             if found_toc_in_links:
                 break
 
-        # Fallback: If no link-based TOC found, search for text patterns
         if not toc_items:
             logger.warning(
                 "TOC extraction using <a> tags failed. Trying text search fallback..."
@@ -156,28 +139,24 @@ class SECProcessor:
                 match = self.item_pattern.match(text)
                 if match:
                     item_number = match.group(1).strip().rstrip(".")
-                    title = text[match.end() :].strip().lstrip(".- ").strip()
-                    title = re.sub(r"\s*\.{3,}\s*\d+$", "", title).strip()
-                    title = re.sub(r"\s+\d+$", "", title).strip()
                     anchor = None
                     parent_tag = text_node.find_parent()
                     if parent_tag:
                         if parent_tag.get("id"):
                             anchor = f"#{parent_tag['id']}"
-                        elif parent_tag.get("name"):  # Old anchor method
+                        elif parent_tag.get("name"):
                             anchor = f"#{parent_tag['name']}"
 
                     if item_number.lower() not in seen_items and len(item_number) < 20:
                         toc_items.append(
                             TableOfContentsItem(
                                 item_number=item_number,
-                                title=title if title else "N/A",
+                                title=self._get_item_title(item_number),
                                 anchor_text=anchor,
                             )
                         )
                         seen_items.add(item_number.lower())
 
-        # Note: Sorting TOC items might be needed if discovery order isn't reliable. Currently relies on document order.
         return toc_items
 
     def _find_section_start_element(

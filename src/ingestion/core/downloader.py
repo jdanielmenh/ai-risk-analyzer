@@ -12,13 +12,10 @@ from tenacity import (
     wait_exponential,
 )
 
-import ingestion.models.ingestion_models as ingestion_models
+import src.ingestion.models.ingestion_models as ingestion_models
+from src.utils.logging_utils import setup_logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging(__name__)
 
 # SEC requires an email in the User-Agent
 HEADERS = {"User-Agent": "John Doe johndoe@gmail.com"}

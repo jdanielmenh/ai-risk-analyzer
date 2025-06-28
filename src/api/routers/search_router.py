@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from api.models.api_models import SearchRequest, SearchResult
+from src.api.models.api_models import SearchRequest, SearchResult
 from src.rag.rag_pipeline import RAGPipeline
 
 router = APIRouter()
