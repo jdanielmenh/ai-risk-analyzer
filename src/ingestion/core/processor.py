@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from src.ingestion.core.constants import (
     ITEM_TITLE_MAPPING,
 )
-from src.ingestion.models.ingestion_models import (
+from models.ingestion_models import (
     ChunkMetadata,
     DocumentChunk,
     Section,
