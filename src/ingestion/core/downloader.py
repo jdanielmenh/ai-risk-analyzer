@@ -12,7 +12,7 @@ from tenacity import (
     wait_exponential,
 )
 
-import src.ingestion.models.ingestion_models as ingestion_models
+import models.ingestion_models as ingestion_models
 from src.utils.logging_utils import setup_logging
 
 logger = setup_logging(__name__)

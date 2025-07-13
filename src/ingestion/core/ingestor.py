@@ -1,6 +1,6 @@
 from neo4j import Driver
 
-from src.ingestion.models.ingestion_models import DocumentChunk
+from models.ingestion_models import DocumentChunk
 from src.utils import IngestionSettings
 
 settings = IngestionSettings()

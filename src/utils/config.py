@@ -15,3 +15,16 @@ class IngestionSettings(BaseSettings):
     graph_password: str = "password"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+
+
+class ClientsSettings(BaseSettings):
+    news_api_key: str
+    fmp_api_key: str
+    http_timeout: int = 10
+
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "ignore",
+    }
