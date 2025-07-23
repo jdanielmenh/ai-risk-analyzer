@@ -8,9 +8,9 @@ from collections.abc import Sequence
 from datetime import date
 from typing import Any, Literal
 
-from src.errors.errors import APIError
-from src.models.fmp_models import FMPArticle, FMPArticlesResponse
-from src.utils.config import ClientsSettings
+from errors.errors import APIError
+from models.fmp_models import FMPArticle, FMPArticlesResponse
+from utils.config import ClientsSettings
 
 from .base_client import BaseAPIClient
 

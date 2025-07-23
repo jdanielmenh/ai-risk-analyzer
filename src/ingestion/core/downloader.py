@@ -13,7 +13,7 @@ from tenacity import (
 )
 
 import models.ingestion_models as ingestion_models
-from src.utils.logging_utils import setup_logging
+from utils.logging_utils import setup_logging
 
 logger = setup_logging(__name__)
 
