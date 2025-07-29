@@ -1,42 +1,34 @@
-import asyncio
-from typing import Any, Protocol, TypeVar
-
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
-from riskbot.utils.nodes import intent_router_node
+from riskbot.utils.nodes import ask_again_node, intent_router_node, planner_node
 from riskbot.utils.states import RouterState
 
 
-class AsyncGraph(Protocol):
-    async def ainvoke(self, state: Any) -> Any:  # noqa: D401, D403
-        ...
+def build_graph() -> StateGraph:
+    g = StateGraph(RouterState)
+
+    # Nodes
+    g.add_node("router", intent_router_node)
+    g.add_node("ask_again", ask_again_node)
+    g.add_node("planner", planner_node)
+
+    g.add_conditional_edges(
+        "router",
+        lambda s: s.router_label,
+        {"VALID": "planner", "INVALID": "ask_again"},
+    )
+
+    g.add_edge(START, "router")
+    g.add_edge("ask_again", "router")
+    g.add_edge("planner", END)
+    return g.compile(checkpointer=InMemorySaver())
 
 
-GraphT = TypeVar("GraphT", bound=AsyncGraph)
+router_graph: StateGraph = build_graph()
 
 
-def build_graph() -> GraphT:  # type: ignore[valid-type]
-    graph = StateGraph(RouterState)
-    graph.add_edge(START, "router")
-    graph.add_node("router", intent_router_node)
-    graph.set_entry_point("router")
-    graph.add_edge("router", END)
-    return graph.compile()  # type: ignore[return-value]
-
-
-router_graph: GraphT = build_graph()
-aSyncResult = TypeVar("aSyncResult")
-
-
-async def run_async(graph: GraphT, state: Any) -> Any:
-    return await graph.ainvoke(state)
-
-
-def run(graph: GraphT, state: Any) -> Any:
-    return asyncio.run(run_async(graph, state))
-
-
-def classify(question: str, graph: GraphT = router_graph) -> str:
-    state: RouterState = {"query": question, "router_label": ""}
-    result = run(graph, state)
+def classify(question: str, graph: StateGraph = router_graph) -> str:
+    state: RouterState = {"question": question, "router_label": ""}
+    result = graph.astream(state)
     return result["router_label"]

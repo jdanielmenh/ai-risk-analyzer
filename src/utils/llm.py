@@ -1,10 +1,8 @@
 from functools import lru_cache
 
 from langchain.callbacks.base import Callbacks
-from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from riskbot.utils.states import RouterState
 from utils.config import LLMSettings
 
 

@@ -29,7 +29,7 @@ def get_router_chain() -> RunnableSequence:
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", template_text + "\n\n{format_instructions}"),
-            ("user", "{query}"),
+            ("user", "{question}"),
         ]
     ).partial(format_instructions=parser.get_format_instructions())
 

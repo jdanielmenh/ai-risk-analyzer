@@ -1,6 +1,9 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 
 class RouterState(BaseModel):
-    query: str
-    router_label: str = ""
+    question: str
+    router_label: Literal["VALID", "INVALID"] | None = None
+    answer: str | None = None

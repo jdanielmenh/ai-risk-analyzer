@@ -1,7 +1,9 @@
 import logging
 
 
-def setup_logging(name: str | None = None, level: int = logging.INFO) -> logging.Logger:
+def setup_logging(
+    name: str | None = None, level: int = logging.DEBUG
+) -> logging.Logger:
     """Set up basic logging and return a named logger."""
     logging.basicConfig(
         level=level,

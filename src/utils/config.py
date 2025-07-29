@@ -5,17 +5,35 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
+from utils.logging_utils import setup_logging
+
+logger = setup_logging(__name__)
+
 REQUIRED_ENV_VARS = (
     "OPENAI_API_KEY",
     "LANGSMITH_API_KEY",
     "LANGSMITH_TRACING",
     "LANGSMITH_ENDPOINT",
     "LANGSMITH_PROJECT",
+    "LANGSMITH_TEST_TRACKING",
 )
-if not all(var in os.environ for var in REQUIRED_ENV_VARS):
-    env_path = Path(__file__).resolve().parent / ".env"
-    if env_path.exists():
-        load_dotenv(env_path)
+
+
+def load_required_env_vars() -> None:
+    if not all(var in os.environ for var in REQUIRED_ENV_VARS):
+        env_path = Path(__file__).resolve().parents[2] / ".env"
+        logger.debug(f"Loading environment variables from {env_path}")
+        if env_path.exists():
+            load_dotenv(env_path)
+
+        missing = [var for var in REQUIRED_ENV_VARS if var not in os.environ]
+        if missing:
+            logger.warning(
+                "The following required environment variables are still missing: "
+                + ", ".join(missing)
+            )
+    else:
+        logger.debug("All required environment variables are already present.")
 
 
 class IngestionSettings(BaseSettings):

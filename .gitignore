@@ -3,3 +3,6 @@
 data/
 __pycache__/
 *.py[cod]
+.chainlit/
+chainlit.md
+.pytest_cache/
