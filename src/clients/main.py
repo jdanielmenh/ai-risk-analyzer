@@ -1,6 +1,6 @@
 import asyncio
 
-from src.clients.fmp_client import FMPClient
+from clients.fmp_client import FMPClient
 
 
 async def demo():

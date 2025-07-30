@@ -3,11 +3,11 @@ import os
 
 from neo4j import GraphDatabase
 
-from src.ingestion.core.downloader import SECDownloader
-from src.ingestion.core.ingestor import GraphIngestor
-from src.ingestion.core.processor import SECProcessor
-from src.utils.config import IngestionSettings
-from src.utils.logging_utils import setup_logging
+from ingestion.core.downloader import SECDownloader
+from ingestion.core.ingestor import GraphIngestor
+from ingestion.core.processor import SECProcessor
+from utils.config import IngestionSettings
+from utils.logging_utils import setup_logging
 
 logger = setup_logging(__name__)
 

@@ -4,7 +4,7 @@ import re
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-from src.ingestion.core.constants import (
+from ingestion.core.constants import (
     ITEM_TITLE_MAPPING,
 )
 from models.ingestion_models import (
@@ -13,7 +13,7 @@ from models.ingestion_models import (
     Section,
     TableOfContentsItem,
 )
-from src.utils.logging_utils import setup_logging
+from utils.logging_utils import setup_logging
 
 logger = setup_logging(__name__)
 
