@@ -52,7 +52,6 @@ class IngestionSettings(BaseSettings):
 
 
 class ClientsSettings(BaseSettings):
-    news_api_key: str
     fmp_api_key: str
     http_timeout: int = 10
 
