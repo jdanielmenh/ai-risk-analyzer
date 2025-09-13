@@ -41,16 +41,18 @@ async def executor_node(state: ConversationState) -> ConversationState:
     if not state.execution_plan:
         raise ValueError("No execution plan found in state")
 
-    api_results = {}
+    # Preserve any existing results (e.g., from document_retriever)
+    api_results = dict(state.api_results or {})
 
     async with FMPClient() as client:
         for i, api_call in enumerate(state.execution_plan.api_calls):
             try:
-                # Get the API enum
+                # Get the API enum (expects the enum member name, e.g., "ECONOMICS_CALENDAR")
                 api_enum = FreeRiskAPI[api_call.endpoint]
 
-                # Format the URL with parameters
-                path = api_enum(**{k: str(v) for k, v in api_call.params.items()})
+                # Format the URL template with provided params
+                fmt_params = {k: str(v) for k, v in api_call.params.items()}
+                path = api_enum.value.format(**fmt_params)
 
                 # Make the API call
                 result = await client._fmp_get(path)
@@ -64,6 +66,15 @@ async def executor_node(state: ConversationState) -> ConversationState:
                     "data": result,
                 }
 
+            except KeyError as e:
+                # Missing format parameter or bad enum name
+                result_key = f"{api_call.endpoint.lower()}_{i}_error"
+                api_results[result_key] = {
+                    "endpoint": api_call.endpoint,
+                    "params": api_call.params,
+                    "purpose": api_call.purpose,
+                    "error": f"Missing parameter for endpoint template: {e}",
+                }
             except Exception as e:
                 # Store error information
                 result_key = f"{api_call.endpoint.lower()}_{i}_error"
@@ -74,6 +85,7 @@ async def executor_node(state: ConversationState) -> ConversationState:
                     "error": str(e),
                 }
 
+    # Merge API results with any previously stored results
     state.api_results = api_results
     return state
 
@@ -94,6 +106,9 @@ async def reasoner_node(state: ConversationState) -> ConversationState:
         "question": state.question,
         "execution_plan": state.execution_plan.model_dump(),
         "api_results": state.api_results,
+        "document_results": state.api_results.get("document_search", {})
+        if state.api_results
+        else {},
     }
 
     try:

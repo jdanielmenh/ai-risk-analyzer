@@ -1,6 +1,7 @@
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
+from riskbot.utils.document_retriever import document_retriever_node
 from riskbot.utils.nodes import (
     ask_again_node,
     executor_node,
@@ -18,6 +19,7 @@ def build_graph() -> StateGraph:
     g.add_node("router", intent_router_node)
     g.add_node("ask_again", ask_again_node)
     g.add_node("planner", planner_node)
+    g.add_node("document_retriever", document_retriever_node)
     g.add_node("executor", executor_node)
     g.add_node("reasoner", reasoner_node)
 
@@ -29,7 +31,8 @@ def build_graph() -> StateGraph:
 
     g.add_edge(START, "router")
     g.add_edge("ask_again", "router")
-    g.add_edge("planner", "executor")
+    g.add_edge("planner", "document_retriever")
+    g.add_edge("document_retriever", "executor")
     g.add_edge("executor", "reasoner")
     g.add_edge("reasoner", END)
     return g.compile(checkpointer=InMemorySaver())
@@ -40,5 +43,5 @@ router_graph: StateGraph = build_graph()
 
 def classify(question: str, graph: StateGraph = router_graph) -> str:
     state: ConversationState = {"question": question, "router_label": ""}
-    result = graph.astream(state)
+    result = graph.invoke(state)
     return result["router_label"]

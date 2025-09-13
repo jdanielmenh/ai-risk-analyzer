@@ -3,17 +3,21 @@ import os
 
 from neo4j import GraphDatabase
 
+from indexing.indexer import create_vector_indexer
 from ingestion.core.downloader import SECDownloader
 from ingestion.core.ingestor import GraphIngestor
 from ingestion.core.processor import SECProcessor
-from utils.config import IngestionSettings
+from utils.config import IngestionSettings, VectorStoreSettings, load_required_env_vars
 from utils.logging_utils import setup_logging
 
 logger = setup_logging(__name__)
 
 
 def main():
+    load_required_env_vars()
+
     settings = IngestionSettings()
+    vector_settings = VectorStoreSettings()
     form_types = settings.form_types.split(",")
     downloaded_reports = []
 
@@ -50,6 +54,10 @@ def main():
         )
         ingestor = GraphIngestor(driver)
 
+        # Initialize vector indexer
+        vector_indexer = create_vector_indexer(settings=vector_settings, driver=driver)
+        all_chunks = []
+
         for report in downloaded_reports[0:2]:
             path = report["local_path"]
             company = report["company"]
@@ -60,6 +68,7 @@ def main():
                 path, company=company, year=settings.report_year
             )
             logger.info(f"✔️ Extracted {len(chunks)} chunks from {company}")
+            all_chunks.extend(chunks)
 
             if settings.ingest:
                 ingestor.ingest_chunks(chunks)
@@ -67,6 +76,17 @@ def main():
                     f"✔️ Ingested {len(chunks)} chunks into the graph database."
                 )
 
+        # Vector indexing step
+        if all_chunks:
+            logger.info("🔍 Starting vector indexing...")
+            vector_indexer.index_chunks(all_chunks)
+
+            # Show indexing stats
+            stats = vector_indexer.get_stats()
+            logger.info(f"📊 Vector index stats: {stats}")
+
+        # Cleanup
+        vector_indexer.close()
         driver.close()
 
     logger.info("✅ ETL pipeline finished.")

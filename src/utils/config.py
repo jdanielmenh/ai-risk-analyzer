@@ -81,3 +81,43 @@ class LLMSettings(BaseSettings):
         "env_file_encoding": "utf-8",
         "extra": "ignore",
     }
+
+
+class VectorStoreSettings(BaseSettings):
+    """Settings for Neo4j vector store and embeddings."""
+
+    # Neo4j connection settings
+    neo4j_uri: str = Field("bolt://localhost:7687", description="Neo4j database URI")
+    neo4j_user: str = Field("neo4j", description="Neo4j username")
+    neo4j_password: str = Field("password", description="Neo4j password")
+
+    # Vector index settings
+    vector_index_name: str = Field(
+        "sec_documents_vector", description="Name of the vector index"
+    )
+    document_node_label: str = Field(
+        "DocumentChunk", description="Node label for document chunks"
+    )
+    text_property: str = Field("text", description="Property name for text content")
+    embedding_property: str = Field(
+        "embedding", description="Property name for embeddings"
+    )
+
+    # Embedding settings
+    embedding_model: str = Field("openai", description="Embedding model provider")
+    openai_embedding_model: str = Field(
+        "text-embedding-3-small", description="OpenAI embedding model"
+    )
+    embedding_chunk_size: int = Field(1000, description="Chunk size for embeddings")
+
+    # Vector search settings
+    vector_search_k: int = Field(
+        5, description="Default number of results for vector search"
+    )
+
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "env_prefix": "VECTOR_",
+        "extra": "ignore",
+    }

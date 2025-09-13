@@ -65,7 +65,7 @@ def get_reasoner_chain() -> RunnableSequence:
             ("system", template_text + "\n\n{format_instructions}"),
             (
                 "user",
-                "{question}\n\nExecution Plan:\n{execution_plan}\n\nAPI Results:\n{api_results}",
+                "{question}\n\nExecution Plan:\n{execution_plan}\n\nAPI Results:\n{api_results}\n\nDocument Search Results:\n{document_results}",
             ),
         ]
     ).partial(format_instructions=parser.get_format_instructions())
