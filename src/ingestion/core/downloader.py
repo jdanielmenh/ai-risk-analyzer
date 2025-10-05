@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import time
 
@@ -93,10 +92,19 @@ class SECDownloader:
         return save_path
 
     def fetch_sec_filings(
-        self, form_types: list[str]
+        self, form_types: list[str], tickers: list[str] | None = None
     ) -> list[ingestion_models.DownloadedReport]:
         reports = []
         companies = self.get_sp500_companies()
+
+        if tickers:
+            companies = [
+                company
+                for company in companies
+                if company.ticker.upper() in [t.upper() for t in tickers]
+            ]
+            logger.info(f"Filtering for tickers: {tickers}")
+
         for company in companies:
             for form_type in form_types:
                 url = self.get_latest_filing_url(company.cik, form_type)

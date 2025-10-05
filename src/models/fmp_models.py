@@ -16,9 +16,9 @@ class FMPArticle(BaseModel):
     author: str | None = None
     site: str | None = None
 
-    # Convert comma‑separated string → list[str]
+    # Convert comma-separated string -> list[str]
     @field_validator("tickers", mode="before")
-    def split_tickers(cls, v):  # noqa: D401  (“/plain‑function docstring”) pylint: disable=no-self-argument
+    def split_tickers(cls, v):  # noqa: D401  ("/plain-function docstring") pylint: disable=no-self-argument
         if isinstance(v, str):
             return [t.strip() for t in v.split(",") if t.strip()]
         return v

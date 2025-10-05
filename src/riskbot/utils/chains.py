@@ -5,7 +5,11 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 from langchain.output_parsers import PydanticOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    SystemMessagePromptTemplate,
+)
 from langchain_core.runnables import RunnableSequence
 
 from models.riskbot_models import ExecutionPlan, IntentResponse, ReasonerAnswer
@@ -60,14 +64,14 @@ def get_reasoner_chain() -> RunnableSequence:
 
     llm = get_llm()
     parser = PydanticOutputParser(pydantic_object=ReasonerAnswer)
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", template_text + "\n\n{format_instructions}"),
-            (
-                "user",
-                "{question}\n\nExecution Plan:\n{execution_plan}\n\nAPI Results:\n{api_results}\n\nDocument Search Results:\n{document_results}",
-            ),
-        ]
-    ).partial(format_instructions=parser.get_format_instructions())
+    system_prompt = SystemMessagePromptTemplate.from_template(
+        template_text + "\n\n{format_instructions}"
+    )
+    human_prompt = HumanMessagePromptTemplate.from_template(
+        "{question}\n\nExecution Plan:\n{execution_plan}\n\nAPI Results:\n{api_results}\n\nDocument Search Results:\n{document_results}"
+    )
+    prompt = ChatPromptTemplate.from_messages([system_prompt, human_prompt]).partial(
+        format_instructions=parser.get_format_instructions()
+    )
 
     return prompt | llm | parser

@@ -23,8 +23,10 @@ def main():
 
     if settings.download:
         logger.info("🚀 Starting download step...")
-        downloader = SECDownloader(root_dir=settings.DATA_DIR)
-        downloaded_reports = downloader.fetch_sec_filings(form_types=form_types)
+        downloader = SECDownloader(root_dir=settings.data_dir)
+        downloaded_reports = downloader.fetch_sec_filings(
+            form_types=form_types, tickers=["AAPL", "QCOM", "BAC"]
+        )
     else:
         logger.info(
             "📦 Skipping download step. Using existing files in data directory..."
@@ -58,7 +60,7 @@ def main():
         vector_indexer = create_vector_indexer(settings=vector_settings, driver=driver)
         all_chunks = []
 
-        for report in downloaded_reports[0:2]:
+        for report in downloaded_reports:
             path = report["local_path"]
             company = report["company"]
             if not path:

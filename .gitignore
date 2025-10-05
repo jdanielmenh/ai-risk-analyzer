@@ -6,3 +6,6 @@ __pycache__/
 .chainlit/
 chainlit.md
 .pytest_cache/
+benchmark_out/
+eval/
+scripts/

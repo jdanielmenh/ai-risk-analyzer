@@ -64,13 +64,13 @@ class ClientsSettings(BaseSettings):
 
 
 class LLMSettings(BaseSettings):
-    """Settings for the OpenAI chat model used across the project."""
+    """Settings for the OpenAI chat model used throughout the project."""
 
     openai_api_key: str = Field(description="API key for OpenAI access")
     openai_model: str = Field("gpt-4o-mini", description="OpenAI model name")
     openai_temperature: float = Field(0.0, description="Sampling temperature")
     openai_max_tokens: int | None = Field(
-        default=None, description="Hard limit on tokens to generate"
+        default=None, description="Hard limit on the number of tokens to generate"
     )
     openai_request_timeout: int = Field(
         default=60, description="OpenAI request timeout in seconds"
@@ -113,6 +113,24 @@ class VectorStoreSettings(BaseSettings):
     # Vector search settings
     vector_search_k: int = Field(
         5, description="Default number of results for vector search"
+    )
+
+    # Deterministic sections retriever settings (non-vector mode)
+    deterministic_sections_mode: bool = Field(
+        True,
+        description="When true, use deterministic sections retriever from Neo4j instead of vector/BM25",
+    )
+    deterministic_years_back: int = Field(
+        1, description="How many recent 10-K reports to consider (yearsBack)"
+    )
+    deterministic_sections_k: int = Field(
+        3, description="Number of sections/snippets to return per preferred item"
+    )
+    deterministic_snippet_min: int = Field(
+        400, description="Minimum snippet length (characters)"
+    )
+    deterministic_snippet_max: int = Field(
+        600, description="Maximum snippet length (characters)"
     )
 
     model_config = {
